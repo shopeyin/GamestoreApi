@@ -1,4 +1,8 @@
 ﻿using GameStore.Api.Data;
+using GameStore.Api.Features.Games.Constants;
+using GameStore.Api.Shared.FileUpload;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace GameStore.Api.Features.Games.UpdateGame
 {
@@ -7,27 +11,44 @@ namespace GameStore.Api.Features.Games.UpdateGame
 
         public static void MapUpdateGame(this IEndpointRouteBuilder app)
         {
-            app.MapPut("/{id}", (Guid id, UpdateGameDto updatedGame, GameStoreContext dbContext) =>
+            app.MapPut("/{id}", async (Guid id, [FromForm] UpdateGameDto updatedGame, 
+                GameStoreContext dbContext, FileUploader fileUploader) =>
             {
-
-              
-
-                var existingGame = dbContext.Games.Find(id);
+                var existingGame = await dbContext.Games.FindAsync(id);
                 if (existingGame is null)
                     return Results.NotFound();
+                // Validate the uploaded file
+
+
+                if (updatedGame.ImageFile != null)
+                {
+                    var uploadResult = await fileUploader.UploadFileAsync(updatedGame.ImageFile, StorageNames.GameImagesFolder);
+                    if (uploadResult.IsSuccess)
+                    {
+                        existingGame.ImageUri = uploadResult.FileUrl!;
+                    }
+                    else
+                    {
+
+                        return Results.BadRequest(new { message = uploadResult.ErrorMessage });
+                    }
+                }
+
+
+
 
                 // Update properties
                 existingGame.Name = updatedGame.Name;
                 existingGame.Price = updatedGame.Price;
-           
                 existingGame.GenreId = updatedGame.GenreId;
                 existingGame.ReleaseDate = updatedGame.ReleaseDate;
                 existingGame.Description = updatedGame.Description;
 
-                dbContext.SaveChanges();
-                //return Results.Ok(existingGame);
+                await dbContext.SaveChangesAsync();
+              
                 return Results.NoContent();
-            }).WithParameterValidation();
+            }).WithParameterValidation().DisableAntiforgery()
+            ;
         }
     }
 }

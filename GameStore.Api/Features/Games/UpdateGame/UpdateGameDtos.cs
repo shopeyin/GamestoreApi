@@ -17,6 +17,9 @@ namespace GameStore.Api.Features.Games.UpdateGame
      [Required]
    [StringLength(530)]
      string Description
-    );
+    )
+    {
+        public IFormFile? ImageFile { get; set; }
+    }
 
 }

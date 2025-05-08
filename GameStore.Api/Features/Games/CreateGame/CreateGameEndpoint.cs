@@ -1,17 +1,38 @@
 ﻿using GameStore.Api.Data;
+using GameStore.Api.Features.Games.Constants;
 using GameStore.Api.Models;
+using GameStore.Api.Shared.FileUpload;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.Api.Features.Games.CreateGame
 {
     public static class CreateGameEndpoint
     {
 
+        private const string DefaultImageUri = "https://placehold.co/100";
         public static void MapCreateGameEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapPost("/", (CreateGameDto newGameDto, GameStoreContext dbContext) =>
+            app.MapPost("/", async (
+                [FromForm] CreateGameDto newGameDto, 
+                GameStoreContext dbContext, 
+                ILogger<Program> logger, FileUploader fileUploader) =>
             {
 
-               
+                var imageUri = DefaultImageUri;
+
+                if (newGameDto.ImageFile != null)
+                {
+                    var uploadResult = await fileUploader.UploadFileAsync(newGameDto.ImageFile, StorageNames.GameImagesFolder);
+                    if (uploadResult.IsSuccess)
+                    {
+                        imageUri = uploadResult.FileUrl;
+                    }
+                    else
+                    {
+                      
+                        return Results.BadRequest(new { message = uploadResult.ErrorMessage });
+                    }
+                }
 
                 var game = new Game
                 {
@@ -20,12 +41,14 @@ namespace GameStore.Api.Features.Games.CreateGame
                     Description = newGameDto.Description,
                     Price = newGameDto.Price,
                     GenreId = newGameDto.GenreId,
-                    ReleaseDate = newGameDto.ReleaseDate
+                    ReleaseDate = newGameDto.ReleaseDate,
+                    ImageUri = imageUri!
                 };
 
                 dbContext.Games.Add(game);
-                dbContext.SaveChanges();
-
+                await dbContext.SaveChangesAsync();
+             
+                logger.LogInformation("Game created with ID {Id} and NAME {Name} :", game.Id, game.Name);
                 //return Results.Created($"/games/{newGame.Id}", newGame);
                 return Results.CreatedAtRoute("GetGameById", new { id = game.Id }, new GameDetailsDto(
                          game.Id,
@@ -33,8 +56,9 @@ namespace GameStore.Api.Features.Games.CreateGame
                         game.GenreId,
                         game.Price,
                         game.ReleaseDate,
-                        game.Description));
-            }).WithParameterValidation();
+                        game.Description,
+                        game.ImageUri));
+            }).WithParameterValidation().DisableAntiforgery();
         }
     }
 }

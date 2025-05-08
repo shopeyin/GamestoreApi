@@ -13,8 +13,7 @@ namespace GameStore.Api.Models
 
         public Guid GenreId { get; set; }
         public DateOnly ReleaseDate { get; set; }
-        //public string ImageUrl { get; set; } = string.Empty;
-        //public bool IsAvailable { get; set; } = true;
-        //public int StockQuantity { get; set; } = 0;
+        public required string ImageUri { get; set; }
+
     }
 }

@@ -8,31 +8,29 @@ namespace GameStore.Api.Features.Games.GetGames
 
         public static void MapGetGamesEndpoint(this IEndpointRouteBuilder app)
         {
-            //app.MapGet("/", (GameStoreContext dbContext) =>
-            //{
+   
 
-            //    var gameDtos = dbContext.Games.Select(game => new GameSummaryDto(
-            //        game.Id,
-            //        game.Name,
-            //        game.Genre!.Name,
-            //        game.Price,
-            //        game.ReleaseDate
-            //    )).ToList();
-            //    return Results.Ok(gameDtos);
-            //}).WithName("GetAllGames");
-
-            app.MapGet("/", (GameStoreContext dbContext) =>
+            app.MapGet("/", async (GameStoreContext dbContext, [AsParameters] GetGamesDto request) =>
             {
+                var skipCount = (request.PageNumber - 1) * request.PageSize;
 
-                var gameDtos =  dbContext.Games.Include(game => game.Genre)
+                var filteredGames = dbContext.Games
+                    .Where(game => string.IsNullOrWhiteSpace(request.Name) || EF.Functions.Like(game.Name, $"%{request.Name}%"));
+               
+                var gamesOnPage =  await filteredGames.OrderBy(game => game.Name).Skip(skipCount).Take(request.PageSize).Include(game => game.Genre)
                 .Select(game => new GameSummaryDto(
                     game.Id,
                     game.Name,
                     game.Genre!.Name,
                     game.Price,
-                    game.ReleaseDate
-                )).AsNoTracking();
-                return Results.Ok(gameDtos);
+                    game.ReleaseDate,
+                    game.ImageUri
+                )).AsNoTracking().ToListAsync();
+
+                var totalGames = await filteredGames.CountAsync();
+                var totalPages = (int)Math.Ceiling((double)totalGames / request.PageSize);
+
+                return new GamesPageDto(totalPages, gamesOnPage);
             });
         }
     }
