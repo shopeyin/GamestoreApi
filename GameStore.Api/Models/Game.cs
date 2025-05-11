@@ -14,6 +14,8 @@ namespace GameStore.Api.Models
         public Guid GenreId { get; set; }
         public DateOnly ReleaseDate { get; set; }
         public required string ImageUri { get; set; }
+     
+        public required string LastUpdatedBy { get; set; } 
 
     }
 }

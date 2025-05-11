@@ -23,7 +23,8 @@ namespace GameStore.Api.Features.Games.GetGame
                             game.Price,
                             game.ReleaseDate,
                             game.Description,
-                            game.ImageUri));
+                            game.ImageUri,
+                            game.LastUpdatedBy));
                
                    
                 

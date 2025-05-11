@@ -1,4 +1,6 @@
-﻿using GameStore.Api.Data;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using GameStore.Api.Data;
 using GameStore.Api.Features.Games.Constants;
 using GameStore.Api.Models;
 using GameStore.Api.Shared.FileUpload;
@@ -15,8 +17,21 @@ namespace GameStore.Api.Features.Games.CreateGame
             app.MapPost("/", async (
                 [FromForm] CreateGameDto newGameDto, 
                 GameStoreContext dbContext, 
-                ILogger<Program> logger, FileUploader fileUploader) =>
+                ILogger<Program> logger, FileUploader fileUploader, ClaimsPrincipal user) =>
             {
+
+                if (user.Identity?.IsAuthenticated == false)
+                {
+                    return Results.Unauthorized();
+                }
+
+                var currentUserId = user?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+                if (string.IsNullOrEmpty(currentUserId))
+                {
+                    return Results.Unauthorized();
+                }
+
 
                 var imageUri = DefaultImageUri;
 
@@ -42,7 +57,8 @@ namespace GameStore.Api.Features.Games.CreateGame
                     Price = newGameDto.Price,
                     GenreId = newGameDto.GenreId,
                     ReleaseDate = newGameDto.ReleaseDate,
-                    ImageUri = imageUri!
+                    ImageUri = imageUri!,
+                    LastUpdatedBy = currentUserId
                 };
 
                 dbContext.Games.Add(game);
@@ -57,7 +73,8 @@ namespace GameStore.Api.Features.Games.CreateGame
                         game.Price,
                         game.ReleaseDate,
                         game.Description,
-                        game.ImageUri));
+                        game.ImageUri,
+                        game.LastUpdatedBy));
             }).WithParameterValidation().DisableAntiforgery();
         }
     }
