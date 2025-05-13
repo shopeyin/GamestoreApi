@@ -3,6 +3,7 @@ using System.Security.Claims;
 using GameStore.Api.Data;
 using GameStore.Api.Features.Games.Constants;
 using GameStore.Api.Models;
+using GameStore.Api.Shared.Authorization;
 using GameStore.Api.Shared.FileUpload;
 using Microsoft.AspNetCore.Mvc;
 
@@ -75,7 +76,7 @@ namespace GameStore.Api.Features.Games.CreateGame
                         game.Description,
                         game.ImageUri,
                         game.LastUpdatedBy));
-            }).WithParameterValidation().DisableAntiforgery();
+            }).WithParameterValidation().DisableAntiforgery().RequireAuthorization(Policies.AdminAccess);
         }
     }
 }

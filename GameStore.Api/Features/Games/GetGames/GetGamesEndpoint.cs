@@ -32,7 +32,7 @@ namespace GameStore.Api.Features.Games.GetGames
                 var totalPages = (int)Math.Ceiling((double)totalGames / request.PageSize);
 
                 return new GamesPageDto(totalPages, gamesOnPage);
-            });
+            }).AllowAnonymous();
         }
     }
 }

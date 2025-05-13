@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using GameStore.Api.Data;
 using GameStore.Api.Features.Games.Constants;
+using GameStore.Api.Shared.Authorization;
 using GameStore.Api.Shared.FileUpload;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -56,7 +57,7 @@ namespace GameStore.Api.Features.Games.UpdateGame
                 await dbContext.SaveChangesAsync();
               
                 return Results.NoContent();
-            }).WithParameterValidation().DisableAntiforgery()
+            }).WithParameterValidation().DisableAntiforgery().RequireAuthorization(Policies.AdminAccess);
             ;
         }
     }

@@ -29,7 +29,7 @@ namespace GameStore.Api.Features.Games.GetGame
                    
                 
             })
-            .WithName("GetGameById");
+            .WithName("GetGameById").AllowAnonymous();
         }
     }
 }
