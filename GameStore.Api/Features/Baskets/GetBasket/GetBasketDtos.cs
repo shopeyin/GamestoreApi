@@ -6,7 +6,7 @@
         IEnumerable<BasketItemDto> Items
     )
     {
-        public decimal TotalPrice => Items.Sum(i => i.Price * i.Quantity);
+        public decimal TotalAmount => Items.Sum(item => item.Price * item.Quantity);
     };
     public record class BasketItemDto(
         Guid Id,

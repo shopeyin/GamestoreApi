@@ -26,7 +26,7 @@ namespace GameStore.Api.Features.Games.CreateGame
                     return Results.Unauthorized();
                 }
 
-                var currentUserId = user?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+                var currentUserId = user?.FindFirstValue(JwtRegisteredClaimNames.Email) ?? user?.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
                 if (string.IsNullOrEmpty(currentUserId))
                 {
@@ -58,6 +58,8 @@ namespace GameStore.Api.Features.Games.CreateGame
                     Price = newGameDto.Price,
                     GenreId = newGameDto.GenreId,
                     ReleaseDate = newGameDto.ReleaseDate,
+                  
+                   
                     ImageUri = imageUri!,
                     LastUpdatedBy = currentUserId
                 };

@@ -12,7 +12,7 @@ namespace GameStore.Api.Features.Games.CreateGame
        [Range(1, 100.00)]
         decimal Price,
 
-       DateOnly ReleaseDate,
+        DateOnly ReleaseDate,
 
          [Required]
        [StringLength(530)]

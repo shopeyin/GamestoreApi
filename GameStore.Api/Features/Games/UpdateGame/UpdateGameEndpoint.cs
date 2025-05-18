@@ -18,7 +18,8 @@ namespace GameStore.Api.Features.Games.UpdateGame
                 GameStoreContext dbContext, FileUploader fileUploader, ClaimsPrincipal user) =>
             {
 
-                var currentUserId = user?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+                var currentUserId = user?.FindFirstValue(JwtRegisteredClaimNames.Email) ?? user?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
 
                 if (string.IsNullOrEmpty(currentUserId))
                 {

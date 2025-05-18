@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using GameStore.Api.Data;
 
 using GameStore.Api.Features.Games;
@@ -34,12 +35,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpContextAccessor().AddSingleton<FileUploader>();
 
-builder.Services.AddAuthentication()
-    .AddJwtBearer(options =>
-    {
-        options.MapInboundClaims = false;
-        options.TokenValidationParameters.RoleClaimType = "role";
-    });
+builder.AddGameStoreAuthentication();
 
 builder.AddGameStoreAuthorization();
 builder.Services.AddSingleton<IAuthorizationHandler, BasketAuthorizationHandler>();
